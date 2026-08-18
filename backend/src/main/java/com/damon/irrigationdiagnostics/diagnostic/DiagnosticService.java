@@ -16,6 +16,8 @@ import com.damon.irrigationdiagnostics.inference.InferenceResult;
 import com.damon.irrigationdiagnostics.inference.InferenceRun;
 import com.damon.irrigationdiagnostics.inference.InferenceRunRepository;
 
+import com.damon.irrigationdiagnostics.telemetry.TelemetryNotFoundException;
+
 @Service
 public class DiagnosticService {
 
@@ -45,11 +47,7 @@ public class DiagnosticService {
     public DiagnosticResponse runDiagnostics(Long telemetryReadingId) {
 
         TelemetryReading reading = telemetryRepository.findById(telemetryReadingId)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Telemetry reading not found with id: " + telemetryReadingId
-                        )
-                );
+                .orElseThrow(() -> new TelemetryNotFoundException(telemetryReadingId));
 
         // 1. Run deterministic analysis
         List<DiagnosticFinding> findings =
@@ -140,13 +138,29 @@ public class DiagnosticService {
             );
         }
 
+        int promptTokens = 0;
+        int outputTokens = 0;
+        long totalLatencyMs = 0;
+        double generationTokensPerSecond = 0.0;
+
+        if (inferenceResult != null) {
+            promptTokens = inferenceResult.getPromptTokens();
+            outputTokens = inferenceResult.getOutputTokens();
+            totalLatencyMs = inferenceResult.getTotalLatencyMs();
+            generationTokensPerSecond =
+                    inferenceResult.getGenerationTokensPerSecond();
+        }
         // 6. Return everything
         return new DiagnosticResponse(
                 savedRun.getId(),
                 savedRun.getStatus(),
                 savedRun.getCreatedAt(),
                 persistedFindings,
-                aiExplanation
+                aiExplanation,
+                promptTokens,
+                outputTokens,
+                totalLatencyMs,
+                generationTokensPerSecond
         );
     }
 
