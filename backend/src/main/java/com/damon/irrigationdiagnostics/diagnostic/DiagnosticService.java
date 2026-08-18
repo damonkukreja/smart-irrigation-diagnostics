@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.damon.irrigationdiagnostics.inference.InferenceProvider;
+import com.damon.irrigationdiagnostics.inference.InferenceResult;
+
+import com.damon.irrigationdiagnostics.inference.InferenceRun;
+import com.damon.irrigationdiagnostics.inference.InferenceRunRepository;
 
 @Service
 public class DiagnosticService {
@@ -20,19 +24,22 @@ public class DiagnosticService {
     private final DiagnosticRunRepository diagnosticRunRepository;
     private final PersistedDiagnosticFindingRepository findingRepository;
     private final InferenceProvider inferenceProvider;
+    private final InferenceRunRepository inferenceRunRepository;
 
     public DiagnosticService(
             TelemetryRepository telemetryRepository,
             TelemetryAnalyzer telemetryAnalyzer,
             DiagnosticRunRepository diagnosticRunRepository,
             PersistedDiagnosticFindingRepository findingRepository,
-            InferenceProvider inferenceProvider
+            InferenceProvider inferenceProvider,
+            InferenceRunRepository inferenceRunRepository
     ) {
         this.telemetryRepository = telemetryRepository;
         this.telemetryAnalyzer = telemetryAnalyzer;
         this.diagnosticRunRepository = diagnosticRunRepository;
         this.findingRepository = findingRepository;
         this.inferenceProvider = inferenceProvider;
+        this.inferenceRunRepository = inferenceRunRepository;
     }
 
     public DiagnosticResponse runDiagnostics(Long telemetryReadingId) {
@@ -52,16 +59,21 @@ public class DiagnosticService {
         String prompt = buildPrompt(findings);
 
         String aiExplanation;
+        InferenceResult inferenceResult = null;
         DiagnosticStatus status = DiagnosticStatus.COMPLETED;
+        boolean inferenceSuccess = true;
+        String inferenceErrorMessage = null;
 
-        // 3. Attempt AI explanation
         try {
-            aiExplanation = inferenceProvider.generateExplanation(prompt);
+            inferenceResult = inferenceProvider.generateExplanation(prompt);
+            aiExplanation = inferenceResult.getExplanation();
         } catch (Exception e) {
             aiExplanation =
                     "AI explanation unavailable. Deterministic diagnostic findings are still valid.";
 
             status = DiagnosticStatus.COMPLETED_WITHOUT_AI;
+            inferenceSuccess = false;
+            inferenceErrorMessage = e.getMessage();
         }
 
         // 4. Save the diagnostic run with the correct final status
@@ -73,6 +85,39 @@ public class DiagnosticService {
 
         DiagnosticRun savedRun =
                 diagnosticRunRepository.save(diagnosticRun);
+
+        InferenceRun inferenceRun;
+
+        if (inferenceSuccess && inferenceResult != null) {
+
+            inferenceRun = new InferenceRun(
+                    savedRun,
+                    "qwen3.5:9b",
+                    inferenceResult.getPromptTokens(),
+                    inferenceResult.getOutputTokens(),
+                    inferenceResult.getTotalLatencyMs(),
+                    inferenceResult.getGenerationTokensPerSecond(),
+                    true,
+                    null,
+                    LocalDateTime.now()
+            );
+
+        } else {
+
+            inferenceRun = new InferenceRun(
+                    savedRun,
+                    "qwen3.5:9b",
+                    0,
+                    0,
+                    0,
+                    0.0,
+                    false,
+                    inferenceErrorMessage,
+                    LocalDateTime.now()
+            );
+        }
+
+        inferenceRunRepository.save(inferenceRun);
 
         // 5. Persist each deterministic finding
         List<PersistedDiagnosticFinding> persistedFindings =

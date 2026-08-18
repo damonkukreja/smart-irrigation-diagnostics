@@ -17,7 +17,7 @@ public class OllamaInferenceProvider implements InferenceProvider {
     }
 
     @Override
-    public String generateExplanation(String prompt) {
+    public InferenceResult generateExplanation(String prompt) {
 
         Map<String, Object> requestBody = Map.of(
                 "model", "qwen3.5:9b",
@@ -36,6 +36,30 @@ public class OllamaInferenceProvider implements InferenceProvider {
             throw new RuntimeException("Ollama returned an empty response");
         }
 
-        return response.response();
+        long totalLatencyMs =
+                response.total_duration() != null
+                        ? response.total_duration() / 1_000_000
+                        : 0;
+
+        double generationTokensPerSecond = 0.0;
+
+        if (response.eval_duration() != null
+                && response.eval_duration() > 0
+                && response.eval_count() != null) {
+
+            double generationSeconds =
+                    response.eval_duration() / 1_000_000_000.0;
+
+            generationTokensPerSecond =
+                    response.eval_count() / generationSeconds;
+        }
+
+        return new InferenceResult(
+                response.response(),
+                response.prompt_eval_count() != null ? response.prompt_eval_count() : 0,
+                response.eval_count() != null ? response.eval_count() : 0,
+                totalLatencyMs,
+                generationTokensPerSecond
+        );
     }
 }
