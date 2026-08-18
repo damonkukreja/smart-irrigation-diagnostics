@@ -18,7 +18,7 @@ public class DiagnosticController {
     }
 
     @PostMapping("/telemetry/{telemetryReadingId}")
-    public List<PersistedDiagnosticFinding> runDiagnostics(
+    public DiagnosticResponse runDiagnostics(
             @PathVariable Long telemetryReadingId
     ) {
         return diagnosticService.runDiagnostics(telemetryReadingId);

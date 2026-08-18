@@ -30,7 +30,7 @@ public class DiagnosticService {
         this.findingRepository = findingRepository;
     }
 
-    public List<PersistedDiagnosticFinding> runDiagnostics(Long telemetryReadingId) {
+    public DiagnosticResponse runDiagnostics(Long telemetryReadingId) {
 
         TelemetryReading reading = telemetryRepository.findById(telemetryReadingId)
                 .orElseThrow(() ->
@@ -71,6 +71,11 @@ public class DiagnosticService {
             );
         }
 
-        return persistedFindings;
+        return new DiagnosticResponse(
+                savedRun.getId(),
+                savedRun.getStatus(),
+                savedRun.getCreatedAt(),
+                persistedFindings
+        );
     }
 }

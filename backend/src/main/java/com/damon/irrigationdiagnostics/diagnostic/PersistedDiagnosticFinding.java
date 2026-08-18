@@ -3,6 +3,8 @@ package com.damon.irrigationdiagnostics.diagnostic;
 import com.damon.irrigationdiagnostics.analysis.AnomalyType;
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class PersistedDiagnosticFinding {
 
@@ -10,6 +12,7 @@ public class PersistedDiagnosticFinding {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     private DiagnosticRun diagnosticRun;
 
