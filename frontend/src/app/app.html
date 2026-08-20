@@ -1,0 +1,106 @@
+<div class="app-shell">
+  <header>
+    <h1>Smart Irrigation Diagnostics</h1>
+    <p>Deterministic anomaly detection with local AI-assisted explanations.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Zones</h2>
+
+      @if (zones().length === 0) {
+        <p>No zones found.</p>
+      } @else {
+        @for (zone of zones(); track zone.id) {
+          <div>
+            <h3>{{ zone.name }}</h3>
+            <p>Expected Flow: {{ zone.expectedFlowLpm }} L/min</p>
+            <p>Expected Pressure: {{ zone.expectedPressurePsi }} PSI</p>
+            <p>Minimum Moisture Increase: {{ zone.minimumMoistureIncreasePct }}%</p>
+
+            <button (click)="selectZone(zone.id)">
+              Select Zone
+            </button>
+          </div>
+        }
+      }
+    </section>
+
+    <section>
+      <h2>Telemetry</h2>
+
+      @if (selectedZoneId() === null) {
+        <p>Select a zone to view telemetry.</p>
+      } @else if (telemetryReadings().length === 0) {
+        <p>No telemetry readings found for this zone.</p>
+      } @else {
+        @for (reading of telemetryReadings(); track reading.id) {
+          <div>
+            <h3>Reading #{{ reading.id }}</h3>
+            <p>Recorded At: {{ reading.recordedAt }}</p>
+            <p>Flow: {{ reading.flowLpm }} L/min</p>
+            <p>Pressure: {{ reading.pressurePsi }} PSI</p>
+            <p>Valve State: {{ reading.valveState }}</p>
+            <p>Runtime: {{ reading.runtimeSeconds }} seconds</p>
+
+            <p>
+              Soil Moisture:
+              {{ reading.initialSoilMoisturePct }}%
+              →
+              {{ reading.finalSoilMoisturePct }}%
+            </p>
+
+            <button
+              (click)="runDiagnostics(reading.id)"
+              [disabled]="diagnosticLoading()">
+              Run Diagnostics
+            </button>
+          </div>
+        }
+      }
+    </section>
+
+    <section>
+      <h2>Diagnostics</h2>
+
+      @if (diagnosticLoading()) {
+        <p>Running diagnostics...</p>
+      } @else if (diagnosticResult(); as result) {
+
+        <p>Status: {{ result.status }}</p>
+        <p>Diagnostic Run ID: {{ result.diagnosticRunId }}</p>
+
+        <h3>Deterministic Findings</h3>
+
+        @if (result.findings.length === 0) {
+          <p>No anomalies detected.</p>
+        } @else {
+          @for (finding of result.findings; track finding.id) {
+            <div>
+              <strong>{{ finding.anomalyType }}</strong>
+              <p>Metric: {{ finding.metric }}</p>
+              <p>Observed: {{ finding.observedValue }}</p>
+              <p>Expected: {{ finding.expectedValue }}</p>
+              <p>Deviation: {{ finding.deviationPct }}%</p>
+            </div>
+          }
+        }
+
+        <h3>Local AI Explanation</h3>
+        <pre>{{ result.aiExplanation }}</pre>
+
+        <h3>Inference Metrics</h3>
+        <p>Prompt Tokens: {{ result.promptTokens }}</p>
+        <p>Output Tokens: {{ result.outputTokens }}</p>
+        <p>Total Latency: {{ result.totalLatencyMs }} ms</p>
+        <p>
+          Generation Speed:
+          {{ result.generationTokensPerSecond }} tokens/sec
+        </p>
+
+      } @else {
+        <p>Select a telemetry reading and run diagnostics.</p>
+      }
+    </section>
+  </main>
+</div>
