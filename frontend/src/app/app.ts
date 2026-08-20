@@ -1,46 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 
-interface Zone {
-  id: number;
-  name: string;
-  expectedFlowLpm: number;
-  expectedPressurePsi: number;
-  minimumMoistureIncreasePct: number;
-}
+import {
+  IrrigationApiService,
+  Zone,
+  TelemetryReading,
+  DiagnosticResponse
+} from './irrigation-api.service';
 
-interface TelemetryReading {
-  id: number;
-  recordedAt: string;
-  flowLpm: number;
-  pressurePsi: number;
-  valveState: string;
-  runtimeSeconds: number;
-  initialSoilMoisturePct: number;
-  finalSoilMoisturePct: number;
-  errorCode: string | null;
-}
-interface DiagnosticFinding {
-  id: number;
-  anomalyType: string;
-  metric: string;
-  observedValue: number;
-  expectedValue: number;
-  deviationPct: number;
-}
 
-interface DiagnosticResponse {
-  diagnosticRunId: number;
-  status: string;
-  createdAt: string;
-  findings: DiagnosticFinding[];
-  aiExplanation: string;
-  promptTokens: number;
-  outputTokens: number;
-  totalLatencyMs: number;
-  generationTokensPerSecond: number;
-}
 @Component({
   selector: 'app-root',
   imports: [CommonModule],
@@ -56,15 +24,37 @@ export class App implements OnInit {
   diagnosticResult = signal<DiagnosticResponse | null>(null);
   diagnosticLoading = signal(false);
 
+
+
+  constructor(private irrigationApi: IrrigationApiService) {
+  }
+
+  ngOnInit(): void {
+    this.irrigationApi
+      .getZones()
+      .subscribe(data => {
+        console.log('Zones received:', data);
+        this.zones.set(data);
+      });
+  }
+
+  selectZone(zoneId: number): void {
+    this.selectedZoneId.set(zoneId);
+
+    this.irrigationApi
+      .getTelemetryForZone(zoneId)
+      .subscribe(data => {
+        console.log('Telemetry received:', data);
+        this.telemetryReadings.set(data);
+      });
+  }
+
   runDiagnostics(telemetryReadingId: number): void {
     this.diagnosticLoading.set(true);
     this.diagnosticResult.set(null);
 
-    this.http
-      .post<DiagnosticResponse>(
-        `http://localhost:8080/api/diagnostics/telemetry/${telemetryReadingId}`,
-        {}
-      )
+    this.irrigationApi
+      .runDiagnostics(telemetryReadingId)
       .subscribe({
         next: data => {
           console.log('Diagnostic result:', data);
@@ -76,30 +66,5 @@ export class App implements OnInit {
           this.diagnosticLoading.set(false);
         }
       });
-  }
+  }}
 
-  constructor(private http: HttpClient) {
-  }
-
-  ngOnInit(): void {
-    this.http
-      .get<Zone[]>('http://localhost:8080/api/zones')
-      .subscribe(data => {
-        console.log('Zones received:', data);
-        this.zones.set(data);
-      });
-  }
-
-  selectZone(zoneId: number): void {
-    this.selectedZoneId.set(zoneId);
-
-    this.http
-      .get<TelemetryReading[]>(
-        `http://localhost:8080/api/telemetry/zone/${zoneId}`
-      )
-      .subscribe(data => {
-        console.log('Telemetry received:', data);
-        this.telemetryReadings.set(data);
-      });
-  }
-}
