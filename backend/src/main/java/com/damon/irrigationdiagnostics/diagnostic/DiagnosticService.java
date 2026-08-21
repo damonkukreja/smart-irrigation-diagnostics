@@ -49,11 +49,11 @@ public class DiagnosticService {
         TelemetryReading reading = telemetryRepository.findById(telemetryReadingId)
                 .orElseThrow(() -> new TelemetryNotFoundException(telemetryReadingId));
 
-        // 1. Run deterministic analysis
+        // Run deterministic analysis
         List<DiagnosticFinding> findings =
                 telemetryAnalyzer.analyze(reading);
 
-        // 2. Build the AI prompt only from deterministic findings
+        // Build the AI prompt only from deterministic findings
         String prompt = buildPrompt(findings);
 
         String aiExplanation;
@@ -74,7 +74,7 @@ public class DiagnosticService {
             inferenceErrorMessage = e.getMessage();
         }
 
-        // 4. Save the diagnostic run with the correct final status
+        // Save the diagnostic run with the correct final status
         DiagnosticRun diagnosticRun = new DiagnosticRun(
                 reading,
                 status,
@@ -117,7 +117,7 @@ public class DiagnosticService {
 
         inferenceRunRepository.save(inferenceRun);
 
-        // 5. Persist each deterministic finding
+        // Persist each deterministic finding
         List<PersistedDiagnosticFinding> persistedFindings =
                 new ArrayList<>();
 
@@ -150,7 +150,7 @@ public class DiagnosticService {
             generationTokensPerSecond =
                     inferenceResult.getGenerationTokensPerSecond();
         }
-        // 6. Return everything
+        // Return everything
         return new DiagnosticResponse(
                 savedRun.getId(),
                 savedRun.getStatus(),

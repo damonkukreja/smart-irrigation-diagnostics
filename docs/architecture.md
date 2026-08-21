@@ -293,7 +293,7 @@ Important fields:
 
 Relationship:
 
-    DiagnosticRun 1 ---- 0..1 InferenceRun
+    DiagnosticRun 1 ---- 1 InferenceRun
 
 for the current workflow.
 
