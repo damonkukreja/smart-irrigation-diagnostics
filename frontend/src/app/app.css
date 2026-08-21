@@ -416,3 +416,34 @@ section:last-child p {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.finding-data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.finding-data > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.finding-data span {
+  display: block;
+  color: #809087;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.finding-data b {
+  display: block;
+  color: #2f4338;
+  font-size: 0.95rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
