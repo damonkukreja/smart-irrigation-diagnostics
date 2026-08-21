@@ -8,7 +8,9 @@
     <section>
       <h2>Zones</h2>
 
-      @if (zones().length === 0) {
+      @if (zonesError()) {
+        <p>{{ zonesError() }}</p>
+      } @else if (zones().length === 0) {
         <p>No zones found.</p>
       } @else {
         @for (zone of zones(); track zone.id) {
@@ -31,6 +33,8 @@
 
       @if (selectedZoneId() === null) {
         <p>Select a zone to view telemetry.</p>
+      } @else if (telemetryError()) {
+        <p>{{ telemetryError() }}</p>
       } @else if (telemetryReadings().length === 0) {
         <p>No telemetry readings found for this zone.</p>
       } @else {
@@ -60,46 +64,134 @@
       }
     </section>
 
-    <section>
+    <section class="diagnostics-section">
       <h2>Diagnostics</h2>
 
       @if (diagnosticLoading()) {
-        <p>Running diagnostics...</p>
+        <p class="status-message">Running diagnostics...</p>
+      } @else if (diagnosticError()) {
+        <p class="error-message">{{ diagnosticError() }}</p>
       } @else if (diagnosticResult(); as result) {
 
-        <p>Status: {{ result.status }}</p>
-        <p>Diagnostic Run ID: {{ result.diagnosticRunId }}</p>
+        <div class="diagnostic-summary">
+          <div>
+            <span class="label">Status</span>
+            <strong class="status-badge">{{ result.status }}</strong>
+          </div>
 
-        <h3>Deterministic Findings</h3>
+          <div>
+            <span class="label">Diagnostic Run</span>
+            <span>#{{ result.diagnosticRunId }}</span>
+          </div>
+        </div>
 
-        @if (result.findings.length === 0) {
-          <p>No anomalies detected.</p>
-        } @else {
-          @for (finding of result.findings; track finding.id) {
-            <div>
-              <strong>{{ finding.anomalyType }}</strong>
-              <p>Metric: {{ finding.metric }}</p>
-              <p>Observed: {{ finding.observedValue }}</p>
-              <p>Expected: {{ finding.expectedValue }}</p>
-              <p>Deviation: {{ finding.deviationPct }}%</p>
+        <div class="diagnostic-grid">
+          <div class="diagnostic-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">AUTHORITATIVE</span>
+                <h3>Deterministic Findings</h3>
+              </div>
+
+              <span class="finding-count">
+            {{ result.findings.length }}
+          </span>
             </div>
-          }
-        }
 
-        <h3>Local AI Explanation</h3>
-        <pre>{{ result.aiExplanation }}</pre>
+            @if (result.findings.length === 0) {
+              <p>No anomalies detected.</p>
+            } @else {
+              <div class="findings-list">
+                @for (finding of result.findings; track finding.id) {
+                  <article class="finding-card">
+                    <strong class="anomaly-badge">
+                      {{ finding.anomalyType }}
+                    </strong>
 
-        <h3>Inference Metrics</h3>
-        <p>Prompt Tokens: {{ result.promptTokens }}</p>
-        <p>Output Tokens: {{ result.outputTokens }}</p>
-        <p>Total Latency: {{ result.totalLatencyMs }} ms</p>
-        <p>
-          Generation Speed:
-          {{ result.generationTokensPerSecond }} tokens/sec
-        </p>
+                    <div class="finding-data">
+                      <div>
+                        <span>Metric</span>
+                        <b>{{ finding.metric }}</b>
+                      </div>
+
+                      <div>
+                        <span>Observed</span>
+                        <b>{{ finding.observedValue }}</b>
+                      </div>
+
+                      <div>
+                        <span>Expected</span>
+                        <b>{{ finding.expectedValue }}</b>
+                      </div>
+
+                      <div>
+                        <span>Deviation</span>
+                        <b>{{ finding.deviationPct | number:'1.2-2' }}%</b>
+                      </div>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="diagnostic-panel ai-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">AI-ASSISTED</span>
+                <h3>Local AI Explanation</h3>
+              </div>
+            </div>
+
+            <p class="ai-note">
+              Generated from verified deterministic findings. The AI does not
+              determine anomaly classifications.
+            </p>
+
+            <markdown [data]="result.aiExplanation"></markdown>
+          </div>
+        </div>
+
+        <div class="metrics-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">OBSERVABILITY</span>
+              <h3>Inference Metrics</h3>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span>Prompt Tokens</span>
+              <strong>{{ result.promptTokens }}</strong>
+            </div>
+
+            <div class="metric-card">
+              <span>Output Tokens</span>
+              <strong>{{ result.outputTokens }}</strong>
+            </div>
+
+            <div class="metric-card">
+              <span>Total Latency</span>
+              <strong>
+                {{ result.totalLatencyMs / 1000 | number:'1.2-2' }} s
+              </strong>
+            </div>
+
+            <div class="metric-card">
+              <span>Generation Speed</span>
+              <strong>
+                {{ result.generationTokensPerSecond | number:'1.2-2' }}
+              </strong>
+              <small>tokens/sec</small>
+            </div>
+          </div>
+        </div>
 
       } @else {
-        <p>Select a telemetry reading and run diagnostics.</p>
+        <p class="status-message">
+          Select a telemetry reading and run diagnostics.
+        </p>
       }
     </section>
   </main>

@@ -1,0 +1,418 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, #eef5f1 0%, #f7faf8 35%, #f3f6f4 100%);
+  color: #1f2a24;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 44px 0 64px;
+}
+
+header {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 28px;
+  padding: 34px 36px;
+  border: 1px solid #d6e3dc;
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 248, 244, 0.96));
+  box-shadow:
+    0 14px 35px rgba(32, 73, 52, 0.08),
+    0 3px 10px rgba(32, 73, 52, 0.04);
+}
+
+header::after {
+  content: "";
+  position: absolute;
+  top: -90px;
+  right: -70px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(47, 125, 85, 0.08);
+}
+
+header h1 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: #153d2b;
+}
+
+header p {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0;
+  color: #5b6e63;
+  font-size: 1.04rem;
+  line-height: 1.65;
+}
+
+main {
+  display: grid;
+  gap: 24px;
+}
+
+section {
+  border: 1px solid #dde8e1;
+  border-radius: 18px;
+  padding: 26px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 10px 28px rgba(34, 65, 49, 0.06),
+    0 2px 6px rgba(34, 65, 49, 0.03);
+}
+
+section h2 {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+  color: #173e2c;
+  letter-spacing: -0.015em;
+}
+
+section h3 {
+  margin: 0 0 12px;
+  color: #234b37;
+  font-size: 1.08rem;
+}
+
+section > div {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid #e1ebe5;
+  border-radius: 14px;
+  background: #fbfdfc;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+section > div:hover {
+  transform: translateY(-1px);
+  border-color: #cbded3;
+  box-shadow: 0 8px 20px rgba(39, 83, 60, 0.06);
+}
+
+p {
+  margin: 7px 0;
+  color: #53655b;
+  line-height: 1.55;
+}
+
+strong {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  border-radius: 999px;
+  background: #fff1ee;
+  color: #a43f2e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+button {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 17px;
+  background: linear-gradient(180deg, #2d7d56, #246746);
+  color: white;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(39, 113, 76, 0.2);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, #338c61, #286f4c);
+  box-shadow: 0 7px 16px rgba(39, 113, 76, 0.26);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+pre {
+  margin: 14px 0 0;
+  padding: 20px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border: 1px solid #dce7e1;
+  border-radius: 14px;
+  background: #f6f9f7;
+  color: #31483b;
+  font-family: inherit;
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+/* Diagnostics hierarchy */
+
+section:last-child > p:first-of-type {
+  font-weight: 600;
+  color: #315241;
+}
+
+/* Make the metrics feel like operational data */
+
+section:last-child p {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive layout */
+
+@media (min-width: 900px) {
+  main {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: start;
+  }
+
+  main section:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    width: min(100% - 20px, 1180px);
+    padding-top: 20px;
+  }
+
+  header {
+    padding: 26px 22px;
+    border-radius: 16px;
+  }
+
+  section {
+    padding: 20px;
+    border-radius: 15px;
+  }
+}
+
+.diagnostics-section {
+  grid-column: 1 / -1;
+}
+
+.diagnostic-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 22px;
+  padding: 15px 18px;
+  border: 1px solid #dce7e1;
+  border-radius: 12px;
+  background: #f8fbf9;
+}
+
+.diagnostic-summary > div {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+.label {
+  color: #78877f;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-badge {
+  margin: 0;
+  padding: 5px 9px;
+  background: #e8f6ee;
+  color: #24704b;
+}
+
+.diagnostic-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.diagnostic-panel,
+.metrics-panel {
+  border: 1px solid #dde8e1;
+  border-radius: 16px;
+  padding: 22px;
+  background: #fbfdfc;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panel-heading h3 {
+  margin: 4px 0 0;
+}
+
+.eyebrow {
+  display: block;
+  color: #7c8c83;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.finding-count {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #edf4f0;
+  color: #315743;
+  font-weight: 750;
+}
+
+.findings-list {
+  display: grid;
+  gap: 14px;
+}
+
+.finding-card {
+  padding: 16px;
+  border: 1px solid #eadeda;
+  border-radius: 12px;
+  background: #fffafa;
+}
+
+.anomaly-badge {
+  margin: 0 0 13px;
+  background: #fff0ec;
+  color: #a84633;
+}
+
+.finding-data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.finding-data div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.finding-data span,
+.metric-card span {
+  color: #809087;
+  font-size: 0.76rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+}
+
+.finding-data b {
+  color: #35483e;
+  font-size: 0.94rem;
+}
+
+.ai-panel {
+  background: linear-gradient(180deg, #f8fbfa, #f4f8f6);
+}
+
+.ai-note {
+  margin: -4px 0 16px;
+  padding: 10px 12px;
+  border-left: 3px solid #438365;
+  background: #edf6f1;
+  color: #557066;
+  font-size: 0.86rem;
+}
+
+.metrics-panel {
+  margin-top: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  padding: 16px;
+  border: 1px solid #e1e9e4;
+  border-radius: 12px;
+  background: white;
+}
+
+.metric-card strong {
+  display: block;
+  margin: 7px 0 0;
+  padding: 0;
+  background: transparent;
+  color: #173e2c;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.metric-card small {
+  color: #7b8a82;
+}
+
+.status-message {
+  color: #66766d;
+}
+
+.error-message {
+  padding: 12px 14px;
+  border: 1px solid #f0c9c2;
+  border-radius: 10px;
+  background: #fff3f1;
+  color: #9d3d30;
+}
+
+@media (min-width: 900px) {
+  .diagnostic-grid {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
