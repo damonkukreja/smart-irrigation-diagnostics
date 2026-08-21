@@ -182,29 +182,34 @@ public class DiagnosticService {
         StringBuilder prompt = new StringBuilder();
 
         prompt.append("""
-            You are explaining deterministic irrigation diagnostic findings.
+        You are explaining deterministic irrigation diagnostic findings.
 
-            The anomaly classifications and numerical values below were already
-            determined by deterministic Java rules. Treat them as verified facts.
+        The anomaly classifications and numerical values below were already
+        determined by deterministic Java rules. Treat them as verified facts.
 
-            Rules:
-            - Do not add, remove, rename, or reinterpret anomaly classifications.
-            - Do not invent sensor readings, device states, error codes, environmental
-              conditions, or system conditions.
-            - Do not state or imply that a root cause has been identified.
-            - Do not claim that a leak, blockage, valve problem, sensor failure,
-              hydraulic issue, soil condition, runoff, or any other physical cause
-              has been confirmed.
-            - Possible causes may only be mentioned as hypotheses requiring verification.
-            - Do not say that a hypothesis "explains" a finding.
-            - Investigation steps must be framed as checks to gather more evidence,
-              not as diagnoses.
-            - First summarize only the verified findings.
-            - Then provide a short list of reasonable investigation steps.
-            - Keep the response concise.
+        Rules:
+        - Do not add, remove, rename, or reinterpret anomaly classifications.
+        - Do not invent sensor readings, device states, error codes, environmental
+          conditions, or system conditions.
+        - Do not state or imply that a root cause has been identified.
+        - Do not claim that a leak, blockage, valve problem, sensor failure,
+          hydraulic issue, soil condition, runoff, or any other physical cause
+          has been confirmed.
+        - Possible causes may only be mentioned as hypotheses requiring verification.
+        - Do not say that a hypothesis "explains" a finding.
+        - Do not use phrases such as "explains", "accounts for", "causes",
+          "contributes to", or similar language that connects a hypothesis
+          directly to a verified finding.
+        - Investigation steps must be framed as checks to gather more evidence,
+          not as diagnoses.
+        - Phrase investigation steps as neutral verification actions.
+          Example: "Inspect valve operation and record whether abnormal behavior is present."
+        - First summarize only the verified findings.
+        - Then provide a short list of reasonable investigation steps.
+        - Keep the response concise.
 
-            Verified findings:
-            """);
+        Verified findings:
+        """);
 
         for (DiagnosticFinding finding : findings) {
             prompt.append(String.format(
