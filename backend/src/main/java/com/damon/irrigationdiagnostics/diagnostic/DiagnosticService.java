@@ -165,48 +165,56 @@ public class DiagnosticService {
     }
 
     private String buildPrompt(List<DiagnosticFinding> findings) {
-
         if (findings.isEmpty()) {
             return """
-                No deterministic irrigation anomalies were detected.
-                Explain this result briefly.
-                Do not invent problems or sensor values.
+                You are explaining deterministic irrigation diagnostic findings.
+
+                No deterministic anomalies were detected.
+
+                Rules:
+                - State that no anomalies were detected by the deterministic rules.
+                - Do not invent sensor readings, conditions, faults, or causes.
+                - Do not suggest that a hidden problem was detected.
+                - Keep the response concise.
                 """;
         }
 
         StringBuilder prompt = new StringBuilder();
 
         prompt.append("""
-        You are explaining deterministic irrigation diagnostic findings.
+            You are explaining deterministic irrigation diagnostic findings.
 
-        The anomaly classifications and numerical values below were already
-        determined by deterministic Java rules. Treat them as verified facts.
+            The anomaly classifications and numerical values below were already
+            determined by deterministic Java rules. Treat them as verified facts.
 
-        Rules:
-        - Do not add, remove, or reinterpret anomaly classifications.
-        - Do not invent sensor readings, device states, error codes, or system conditions.
-        - Do not state a root cause as fact.
-        - Do not claim that a leak, blockage, sensor failure, runoff, soil condition,
-          or other physical cause has been confirmed.
-        - If mentioning possible causes, clearly label them as hypotheses that require verification.
-        - Keep the explanation concise.
-        - First summarize the verified findings.
-        - Then provide a short list of reasonable investigation steps.
+            Rules:
+            - Do not add, remove, rename, or reinterpret anomaly classifications.
+            - Do not invent sensor readings, device states, error codes, environmental
+              conditions, or system conditions.
+            - Do not state or imply that a root cause has been identified.
+            - Do not claim that a leak, blockage, valve problem, sensor failure,
+              hydraulic issue, soil condition, runoff, or any other physical cause
+              has been confirmed.
+            - Possible causes may only be mentioned as hypotheses requiring verification.
+            - Do not say that a hypothesis "explains" a finding.
+            - Investigation steps must be framed as checks to gather more evidence,
+              not as diagnoses.
+            - First summarize only the verified findings.
+            - Then provide a short list of reasonable investigation steps.
+            - Keep the response concise.
 
-        Findings:
-        """);
+            Verified findings:
+            """);
 
         for (DiagnosticFinding finding : findings) {
-            prompt.append("\n- ")
-                    .append(finding.getAnomalyType())
-                    .append(": ")
-                    .append(finding.getMetric())
-                    .append(" observed=")
-                    .append(finding.getObservedValue())
-                    .append(", expected=")
-                    .append(finding.getExpectedValue())
-                    .append(", deviationPct=")
-                    .append(finding.getDeviationPct());
+            prompt.append(String.format(
+                    "%s | metric=%s | observed=%.2f | expected=%.2f | deviationPct=%.2f%n",
+                    finding.getAnomalyType(),
+                    finding.getMetric(),
+                    finding.getObservedValue(),
+                    finding.getExpectedValue(),
+                    finding.getDeviationPct()
+            ));
         }
 
         return prompt.toString();
